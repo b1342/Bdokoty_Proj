@@ -12,7 +12,7 @@ public sealed class ProfessionalProfile
 
     public string? Description { get; set; }
 
-    public string PrimaryCategory { get; set; } = string.Empty;
+    public Guid PrimaryCategoryId { get; set; }
 
     public string SecondaryCategoriesJson { get; set; } = "[]";
 

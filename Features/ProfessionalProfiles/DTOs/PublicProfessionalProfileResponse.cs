@@ -13,7 +13,9 @@ public sealed class PublicProfessionalProfileResponse
 
     public string? Description { get; set; }
 
-    public string PrimaryCategory { get; set; } = string.Empty;
+    public Guid PrimaryCategoryId { get; set; }
+
+    public string PrimaryCategoryName { get; set; } = string.Empty;
 
     public List<string> SecondaryCategories { get; set; } = new List<string>();
 

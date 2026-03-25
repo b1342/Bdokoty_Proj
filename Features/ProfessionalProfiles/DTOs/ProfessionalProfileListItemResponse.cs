@@ -11,7 +11,7 @@ public sealed class ProfessionalProfileListItemResponse
 
     public string DisplayName { get; set; } = string.Empty;
 
-    public string PrimaryCategory { get; set; } = string.Empty;
+    public string PrimaryCategoryName { get; set; } = string.Empty;
 
     public List<string> ServiceAreas { get; set; } = new List<string>();
 

@@ -13,11 +13,10 @@ public sealed class UpdateProfessionalProfileRequestValidator : AbstractValidato
             .MaximumLength(100)
             .When(x => x.DisplayName is not null);
 
-        RuleFor(x => x.PrimaryCategory)
-            .Must(value => value is null || !string.IsNullOrWhiteSpace(value))
-            .WithMessage("PrimaryCategory must not be empty.")
-            .MaximumLength(100)
-            .When(x => x.PrimaryCategory is not null);
+        RuleFor(x => x.PrimaryCategoryId)
+            .Must(value => !value.HasValue || value.Value != System.Guid.Empty)
+            .WithMessage("PrimaryCategoryId must not be empty.")
+            .When(x => x.PrimaryCategoryId.HasValue);
 
         RuleFor(x => x.ContactPreference)
             .Must(value => value is null || IsAllowedContactPreference(value))

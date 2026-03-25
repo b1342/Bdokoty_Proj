@@ -11,9 +11,8 @@ public sealed class CreateProfessionalProfileRequestValidator : AbstractValidato
             .NotEmpty()
             .MaximumLength(100);
 
-        RuleFor(x => x.PrimaryCategory)
-            .NotEmpty()
-            .MaximumLength(100);
+        RuleFor(x => x.PrimaryCategoryId)
+            .NotEmpty();
 
         RuleFor(x => x.ContactPreference)
             .NotEmpty()

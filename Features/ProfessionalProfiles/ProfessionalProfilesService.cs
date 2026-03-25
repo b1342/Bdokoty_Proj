@@ -5,8 +5,10 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using WorkshowcaseApi.Common.Enums;
 using WorkshowcaseApi.Common.Exceptions;
+using WorkshowcaseApi.Domain.Categories;
 using WorkshowcaseApi.Domain.ProfessionalProfiles;
 using WorkshowcaseApi.Domain.Users;
+using WorkshowcaseApi.Features.Categories;
 using WorkshowcaseApi.Features.ProfessionalProfiles.DTOs;
 using WorkshowcaseApi.Features.Users;
 
@@ -16,13 +18,16 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
+    private readonly ICategoryRepository _categoryRepository;
     private readonly IProfessionalProfileRepository _professionalProfileRepository;
     private readonly IUserRepository _userRepository;
 
     public ProfessionalProfilesService(
+        ICategoryRepository categoryRepository,
         IProfessionalProfileRepository professionalProfileRepository,
         IUserRepository userRepository)
     {
+        _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
         _professionalProfileRepository = professionalProfileRepository ?? throw new ArgumentNullException(nameof(professionalProfileRepository));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
     }
@@ -39,6 +44,7 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
             throw new ConflictException("Professional profile already exists for this user.");
         }
 
+        var category = await GetActiveCategoryOrThrowAsync(request.PrimaryCategoryId);
         var now = DateTime.UtcNow;
         var profile = new ProfessionalProfile
         {
@@ -46,7 +52,7 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
             UserId = caller.Id,
             DisplayName = request.DisplayName.Trim(),
             Description = NormalizeNullable(request.Description),
-            PrimaryCategory = request.PrimaryCategory.Trim(),
+            PrimaryCategoryId = category.Id,
             SecondaryCategoriesJson = SerializeStringList(request.SecondaryCategories),
             ServiceAreasJson = SerializeStringList(request.ServiceAreas),
             ContactPhone = NormalizeNullable(request.ContactPhone),
@@ -64,7 +70,7 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
         await _professionalProfileRepository.AddAsync(profile);
         await _professionalProfileRepository.SaveChangesAsync();
 
-        return ToProfessionalProfileResponse(profile);
+        return await ToProfessionalProfileResponseAsync(profile);
     }
 
     public async Task<ProfessionalProfileResponse> GetMyProfileAsync(Guid callerId)
@@ -77,7 +83,7 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
             throw new NotFoundException("Professional profile was not found.");
         }
 
-        return ToProfessionalProfileResponse(profile);
+        return await ToProfessionalProfileResponseAsync(profile);
     }
 
     public async Task<ProfessionalProfileResponse> UpdateMyProfileAsync(Guid callerId, UpdateProfessionalProfileRequest request)
@@ -86,7 +92,7 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
 
         await GetProfessionalCallerOrThrowAsync(callerId);
 
-        var profile = await _professionalProfileRepository.GetByUserIdAsync(callerId);
+        var profile = await _professionalProfileRepository.GetTrackedByUserIdAsync(callerId);
         if (profile is null)
         {
             throw new NotFoundException("Professional profile was not found.");
@@ -102,9 +108,10 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
             profile.Description = NormalizeNullable(request.Description);
         }
 
-        if (request.PrimaryCategory is not null)
+        if (request.PrimaryCategoryId.HasValue)
         {
-            profile.PrimaryCategory = request.PrimaryCategory.Trim();
+            var category = await GetActiveCategoryOrThrowAsync(request.PrimaryCategoryId.Value);
+            profile.PrimaryCategoryId = category.Id;
         }
 
         if (request.SecondaryCategories is not null)
@@ -156,7 +163,7 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
 
         await _professionalProfileRepository.SaveChangesAsync();
 
-        return ToProfessionalProfileResponse(profile);
+        return await ToProfessionalProfileResponseAsync(profile);
     }
 
     public async Task<PublicProfessionalProfileResponse> GetPublicByIdAsync(Guid profileId)
@@ -167,7 +174,7 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
             throw new NotFoundException("Professional profile was not found.");
         }
 
-        return ToPublicProfessionalProfileResponse(profile);
+        return await ToPublicProfessionalProfileResponseAsync(profile);
     }
 
     public async Task<PublicProfessionalProfileResponse> GetPublicByUserIdAsync(Guid userId)
@@ -178,13 +185,19 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
             throw new NotFoundException("Professional profile was not found.");
         }
 
-        return ToPublicProfessionalProfileResponse(profile);
+        return await ToPublicProfessionalProfileResponseAsync(profile);
     }
 
     public async Task<IReadOnlyList<ProfessionalProfileListItemResponse>> GetPublicListAsync()
     {
         var profiles = await _professionalProfileRepository.GetPublicListAsync();
-        return profiles.Select(ToProfessionalProfileListItemResponse).ToArray();
+        var responses = new List<ProfessionalProfileListItemResponse>(profiles.Count);
+        foreach (var profile in profiles)
+        {
+            responses.Add(await ToProfessionalProfileListItemResponseAsync(profile));
+        }
+
+        return responses;
     }
 
     private async Task<User> GetProfessionalCallerOrThrowAsync(Guid callerId)
@@ -247,15 +260,35 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
         return trimmed.Length == 0 ? null : trimmed;
     }
 
-    private static ProfessionalProfileResponse ToProfessionalProfileResponse(ProfessionalProfile profile)
+    private async Task<Category> GetActiveCategoryOrThrowAsync(Guid categoryId)
     {
+        var category = await _categoryRepository.GetByIdAsync(categoryId);
+        if (category is null || !category.IsActive)
+        {
+            throw new ValidationException("PrimaryCategoryId is invalid.");
+        }
+
+        return category;
+    }
+
+    private async Task<string> GetPrimaryCategoryNameAsync(Guid primaryCategoryId)
+    {
+        var category = await _categoryRepository.GetByIdAsync(primaryCategoryId);
+        return category?.Name ?? string.Empty;
+    }
+
+    private async Task<ProfessionalProfileResponse> ToProfessionalProfileResponseAsync(ProfessionalProfile profile)
+    {
+        var primaryCategoryName = await GetPrimaryCategoryNameAsync(profile.PrimaryCategoryId);
+
         return new ProfessionalProfileResponse
         {
             Id = profile.Id,
             UserId = profile.UserId,
             DisplayName = profile.DisplayName,
             Description = profile.Description,
-            PrimaryCategory = profile.PrimaryCategory,
+            PrimaryCategoryId = profile.PrimaryCategoryId,
+            PrimaryCategoryName = primaryCategoryName,
             SecondaryCategories = DeserializeStringList(profile.SecondaryCategoriesJson),
             ServiceAreas = DeserializeStringList(profile.ServiceAreasJson),
             ContactPhone = profile.ContactPhone,
@@ -271,15 +304,18 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
         };
     }
 
-    private static PublicProfessionalProfileResponse ToPublicProfessionalProfileResponse(ProfessionalProfile profile)
+    private async Task<PublicProfessionalProfileResponse> ToPublicProfessionalProfileResponseAsync(ProfessionalProfile profile)
     {
+        var primaryCategoryName = await GetPrimaryCategoryNameAsync(profile.PrimaryCategoryId);
+
         return new PublicProfessionalProfileResponse
         {
             Id = profile.Id,
             UserId = profile.UserId,
             DisplayName = profile.DisplayName,
             Description = profile.Description,
-            PrimaryCategory = profile.PrimaryCategory,
+            PrimaryCategoryId = profile.PrimaryCategoryId,
+            PrimaryCategoryName = primaryCategoryName,
             SecondaryCategories = DeserializeStringList(profile.SecondaryCategoriesJson),
             ServiceAreas = DeserializeStringList(profile.ServiceAreasJson),
             ContactPhone = profile.ContactPhone,
@@ -292,14 +328,16 @@ public sealed class ProfessionalProfilesService : IProfessionalProfilesService
         };
     }
 
-    private static ProfessionalProfileListItemResponse ToProfessionalProfileListItemResponse(ProfessionalProfile profile)
+    private async Task<ProfessionalProfileListItemResponse> ToProfessionalProfileListItemResponseAsync(ProfessionalProfile profile)
     {
+        var primaryCategoryName = await GetPrimaryCategoryNameAsync(profile.PrimaryCategoryId);
+
         return new ProfessionalProfileListItemResponse
         {
             Id = profile.Id,
             UserId = profile.UserId,
             DisplayName = profile.DisplayName,
-            PrimaryCategory = profile.PrimaryCategory,
+            PrimaryCategoryName = primaryCategoryName,
             ServiceAreas = DeserializeStringList(profile.ServiceAreasJson),
             LogoUrl = profile.LogoUrl,
             IsVerified = profile.IsVerified

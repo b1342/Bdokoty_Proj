@@ -104,9 +104,8 @@ public sealed class AppDbContext : DbContext
             entity.Property(x => x.Description)
                 .HasMaxLength(1000);
 
-            entity.Property(x => x.PrimaryCategory)
-                .IsRequired()
-                .HasMaxLength(100);
+            entity.Property(x => x.PrimaryCategoryId)
+                .IsRequired();
 
             entity.Property(x => x.SecondaryCategoriesJson)
                 .IsRequired();
@@ -152,6 +151,11 @@ public sealed class AppDbContext : DbContext
                 .WithOne()
                 .HasForeignKey<ProfessionalProfile>(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne<Category>()
+                .WithMany()
+                .HasForeignKey(x => x.PrimaryCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 }

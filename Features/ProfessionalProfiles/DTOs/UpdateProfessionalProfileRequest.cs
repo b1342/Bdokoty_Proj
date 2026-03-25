@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace WorkshowcaseApi.Features.ProfessionalProfiles.DTOs;
@@ -8,7 +9,7 @@ public sealed class UpdateProfessionalProfileRequest
 
     public string? Description { get; set; }
 
-    public string? PrimaryCategory { get; set; }
+    public Guid? PrimaryCategoryId { get; set; }
 
     public List<string>? SecondaryCategories { get; set; }
 
