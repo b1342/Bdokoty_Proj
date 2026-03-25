@@ -1,11 +1,13 @@
 using System;
-using System.Globalization;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WorkshowcaseApi.Common.Constants;
+using WorkshowcaseApi.Common.Enums;
+using WorkshowcaseApi.Common.Exceptions;
 using WorkshowcaseApi.Features.Auth.DTOs;
+using WorkshowcaseApi.Features.Users;
 
 namespace WorkshowcaseApi.Features.Auth;
 
@@ -14,10 +16,12 @@ namespace WorkshowcaseApi.Features.Auth;
 public sealed class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
+    private readonly IUserRepository _userRepository;
 
-    public AuthController(IAuthService authService)
+    public AuthController(IAuthService authService, IUserRepository userRepository)
     {
         _authService = authService ?? throw new ArgumentNullException(nameof(authService));
+        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
     }
 
     [AllowAnonymous]
@@ -42,45 +46,38 @@ public sealed class AuthController : ControllerBase
     [HttpGet("me")]
     [ProducesResponseType(typeof(MeResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public ActionResult<MeResponse> Me()
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<MeResponse>> Me()
     {
         var userIdRaw = User.FindFirstValue(AppClaimTypes.UserId);
-        var email = User.FindFirstValue(AppClaimTypes.Email);
-        var fullName = User.FindFirstValue(AppClaimTypes.FullName);
-        var userType = User.FindFirstValue(AppClaimTypes.Role);
-        var status = User.FindFirstValue(AppClaimTypes.Status);
-        var createdAtRaw = User.FindFirstValue(AppClaimTypes.CreatedAt);
 
-        if (!Guid.TryParse(userIdRaw, out var userId) ||
-            string.IsNullOrWhiteSpace(email) ||
-            string.IsNullOrWhiteSpace(fullName) ||
-            string.IsNullOrWhiteSpace(userType) ||
-            string.IsNullOrWhiteSpace(status))
+        if (!Guid.TryParse(userIdRaw, out var userId))
         {
             return Unauthorized();
         }
 
-        DateTime createdAt = DateTime.UtcNow;
-        if (!string.IsNullOrWhiteSpace(createdAtRaw) &&
-            DateTime.TryParse(
-                createdAtRaw,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.RoundtripKind,
-                out var parsedCreatedAt))
+        var user = await _userRepository.GetByIdAsync(userId);
+        if (user is null || user.Status == UserStatus.Deleted)
         {
-            createdAt = parsedCreatedAt;
+            throw new NotFoundException("User was not found.");
+        }
+
+        if (user.Status != UserStatus.Active)
+        {
+            throw new ForbiddenException("Only active users can access this endpoint.");
         }
 
         var response = new MeResponse
         {
-            Id = userId,
-            Email = email,
-            FullName = fullName,
-            Phone = User.FindFirstValue(AppClaimTypes.Phone),
-            UserType = userType,
-            ProfileImageUrl = User.FindFirstValue(AppClaimTypes.ProfileImageUrl),
-            Status = status,
-            CreatedAt = createdAt
+            Id = user.Id,
+            Email = user.Email,
+            FullName = user.FullName,
+            Phone = user.Phone,
+            UserType = user.UserType.ToString(),
+            ProfileImageUrl = user.ProfileImageUrl,
+            Status = user.Status.ToString(),
+            CreatedAt = user.CreatedAt
         };
 
         return Ok(response);

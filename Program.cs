@@ -10,6 +10,7 @@ using WorkshowcaseApi.Common.Constants;
 using WorkshowcaseApi.Data;
 using WorkshowcaseApi.Features.Auth;
 using WorkshowcaseApi.Features.Auth.Validators;
+using WorkshowcaseApi.Features.Categories;
 using WorkshowcaseApi.Features.ProfessionalProfiles;
 using WorkshowcaseApi.Features.Users;
 using WorkshowcaseApi.Middleware;
@@ -68,9 +69,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProfessionalProfileRepository, ProfessionalProfileRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IProfessionalProfilesService, ProfessionalProfilesService>();
 
 builder.Services

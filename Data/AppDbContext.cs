@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using WorkshowcaseApi.Domain.Categories;
 using WorkshowcaseApi.Domain.ProfessionalProfiles;
 using WorkshowcaseApi.Domain.Users;
 
@@ -12,6 +13,7 @@ public sealed class AppDbContext : DbContext
     } 
 
     public DbSet<User> Users => Set<User>();
+    public DbSet<Category> Categories => Set<Category>();
     public DbSet<ProfessionalProfile> ProfessionalProfiles => Set<ProfessionalProfile>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -58,6 +60,32 @@ public sealed class AppDbContext : DbContext
                 .IsUnique();
 
             entity.HasIndex(x => new { x.UserType, x.Status });
+        });
+
+        modelBuilder.Entity<Category>(entity =>
+        {
+            entity.ToTable("categories");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(x => x.NormalizedName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(x => x.IsActive)
+                .IsRequired();
+
+            entity.Property(x => x.CreatedAt)
+                .IsRequired();
+
+            entity.HasIndex(x => x.NormalizedName)
+                .IsUnique();
+
+            entity.HasIndex(x => x.IsActive);
         });
 
         modelBuilder.Entity<ProfessionalProfile>(entity =>

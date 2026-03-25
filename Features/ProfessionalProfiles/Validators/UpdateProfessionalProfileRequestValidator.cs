@@ -88,7 +88,12 @@ public sealed class UpdateProfessionalProfileRequestValidator : AbstractValidato
 
     private static bool IsValidAbsoluteUrl(string? value)
     {
-        return System.Uri.TryCreate(value, System.UriKind.Absolute, out _);
+        if (!System.Uri.TryCreate(value, System.UriKind.Absolute, out var uri))
+        {
+            return false;
+        }
+
+        return uri.Scheme == System.Uri.UriSchemeHttp || uri.Scheme == System.Uri.UriSchemeHttps;
     }
 
     private static bool IsEmailPreference(string? contactPreference)
