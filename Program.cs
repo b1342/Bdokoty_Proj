@@ -13,6 +13,7 @@ using WorkshowcaseApi.Features.Auth.Validators;
 using WorkshowcaseApi.Features.Categories;
 using WorkshowcaseApi.Features.ProfessionalProfiles;
 using WorkshowcaseApi.Features.Users;
+using WorkshowcaseApi.Features.Works;
 using WorkshowcaseApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -75,6 +76,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IProfessionalProfilesService, ProfessionalProfilesService>();
+builder.Services.AddScoped<IWorkRepository, WorkRepository>();
+builder.Services.AddScoped<IWorksService, WorksService>();
 
 builder.Services
     .AddFluentValidationAutoValidation()
