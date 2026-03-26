@@ -17,7 +17,7 @@ public sealed class AppDbContext : DbContext
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<ProfessionalProfile> ProfessionalProfiles => Set<ProfessionalProfile>();
     public DbSet<Work> Works => Set<Work>();
-
+    public DbSet<WorkMedia> WorkMedia => Set<WorkMedia>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -229,5 +229,46 @@ public sealed class AppDbContext : DbContext
                 .HasForeignKey(x => x.PrimaryCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+        modelBuilder.Entity<WorkMedia>(entity =>
+{
+    entity.ToTable("work_media");
+
+    entity.HasKey(x => x.Id);
+
+    entity.Property(x => x.WorkId)
+        .IsRequired();
+
+    entity.Property(x => x.MediaType)
+        .HasConversion<string>()
+        .IsRequired();
+
+    entity.Property(x => x.MediaUrl)
+        .IsRequired()
+        .HasMaxLength(2048);
+
+    entity.Property(x => x.ExternalMediaId)
+        .HasMaxLength(255);
+
+    entity.Property(x => x.SortOrder)
+        .IsRequired();
+
+    entity.Property(x => x.Caption)
+        .HasMaxLength(500);
+
+    entity.Property(x => x.IsCover)
+        .IsRequired();
+
+    entity.Property(x => x.CreatedAt)
+        .IsRequired();
+
+    entity.HasOne(x => x.Work)
+        .WithMany(x => x.Media)
+        .HasForeignKey(x => x.WorkId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+    entity.HasIndex(x => x.WorkId);
+
+    entity.HasIndex(x => new { x.WorkId, x.SortOrder });
+});
     }
 }

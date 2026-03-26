@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace WorkshowcaseApi.Features.Works.DTOs;
 
@@ -25,6 +26,8 @@ public sealed class WorkResponse
     public bool HasBeforeAfter { get; set; }
 
     public bool IsAnonymous { get; set; }
+
+    public List<WorkMediaResponse> Media { get; set; } = new();
 
     public string Status { get; set; } = string.Empty;
 

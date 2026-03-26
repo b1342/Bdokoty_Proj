@@ -7,11 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WorkshowcaseApi.Common.Constants;
+using WorkshowcaseApi.Common.Settings;
 using WorkshowcaseApi.Data;
 using WorkshowcaseApi.Features.Auth;
 using WorkshowcaseApi.Features.Auth.Validators;
 using WorkshowcaseApi.Features.Categories;
 using WorkshowcaseApi.Features.ProfessionalProfiles;
+using WorkshowcaseApi.Features.Uploads;
 using WorkshowcaseApi.Features.Users;
 using WorkshowcaseApi.Features.Works;
 using WorkshowcaseApi.Middleware;
@@ -69,6 +71,8 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
+builder.Services.Configure<FileStorageSettings>(configuration.GetSection("FileStorage"));
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProfessionalProfileRepository, ProfessionalProfileRepository>();
@@ -77,7 +81,10 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<IProfessionalProfilesService, ProfessionalProfilesService>();
 builder.Services.AddScoped<IWorkRepository, WorkRepository>();
+builder.Services.AddScoped<IWorkMediaRepository, WorkMediaRepository>();
+builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 builder.Services.AddScoped<IWorksService, WorksService>();
+builder.Services.AddScoped<IWorkMediaService, WorkMediaService>();
 
 builder.Services
     .AddFluentValidationAutoValidation()
@@ -118,6 +125,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

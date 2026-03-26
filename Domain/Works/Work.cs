@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using WorkshowcaseApi.Common.Enums;
 using WorkshowcaseApi.Domain.Categories;
 using WorkshowcaseApi.Domain.Users;
@@ -32,6 +33,8 @@ public sealed class Work
     public bool HasBeforeAfter { get; set; }
 
     public bool IsAnonymous { get; set; }
+
+    public ICollection<WorkMedia> Media { get; set; } = new List<WorkMedia>();
 
     public DateTime CreatedAt { get; set; }
 

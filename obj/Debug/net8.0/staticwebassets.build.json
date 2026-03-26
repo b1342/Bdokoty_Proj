@@ -1,11 +1,39 @@
 {
   "Version": 1,
-  "Hash": "9bVgfcUzQNxOmVw8+WHFG/FwnikICiUuq4B4g1ldLVg=",
+  "Hash": "DJCxSD08br2WsSNyRKcahyVPAekVDtxFLkLroKexL4U=",
   "Source": "WorkshowcaseApi",
   "BasePath": "_content/WorkshowcaseApi",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "WorkshowcaseApi\\wwwroot",
+      "Source": "WorkshowcaseApi",
+      "ContentRoot": "C:\\Users\\1\\Desktop\\project_new\\WorkshowcaseApi\\wwwroot\\",
+      "BasePath": "_content/WorkshowcaseApi",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "C:\\Users\\1\\Desktop\\project_new\\WorkshowcaseApi\\wwwroot\\uploads\\work-media\\2ded6f2816684f9bb40142d33fc034c4.jpg",
+      "SourceId": "WorkshowcaseApi",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\1\\Desktop\\project_new\\WorkshowcaseApi\\wwwroot\\",
+      "BasePath": "_content/WorkshowcaseApi",
+      "RelativePath": "uploads/work-media/2ded6f2816684f9bb40142d33fc034c4.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\work-media\\2ded6f2816684f9bb40142d33fc034c4.jpg"
+    }
+  ]
 }
