@@ -9,13 +9,17 @@ using Microsoft.OpenApi.Models;
 using WorkshowcaseApi.Common.Constants;
 using WorkshowcaseApi.Common.Settings;
 using WorkshowcaseApi.Data;
-using WorkshowcaseApi.Features.Auth;
+using WorkshowcaseApi.Features.Auth.Services;
 using WorkshowcaseApi.Features.Auth.Validators;
-using WorkshowcaseApi.Features.Categories;
-using WorkshowcaseApi.Features.ProfessionalProfiles;
-using WorkshowcaseApi.Features.Uploads;
-using WorkshowcaseApi.Features.Users;
-using WorkshowcaseApi.Features.Works;
+using WorkshowcaseApi.Features.Categories.Repositories;
+using WorkshowcaseApi.Features.Categories.Services;
+using WorkshowcaseApi.Features.ProfessionalProfiles.Repositories;
+using WorkshowcaseApi.Features.ProfessionalProfiles.Services;
+using WorkshowcaseApi.Features.Uploads.Services;
+using WorkshowcaseApi.Features.Users.Repositories;
+using WorkshowcaseApi.Features.Users.Services;
+using WorkshowcaseApi.Features.Works.Repositories;
+using WorkshowcaseApi.Features.Works.Services;
 using WorkshowcaseApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -78,19 +82,20 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProfessionalProfileRepository, ProfessionalProfileRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<ICategoriesService, CategoriesService>();
-builder.Services.AddScoped<IProfessionalProfilesService, ProfessionalProfilesService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProfessionalProfileService, ProfessionalProfileService>();
 builder.Services.AddScoped<IWorkRepository, WorkRepository>();
 builder.Services.AddScoped<IWorkMediaRepository, WorkMediaRepository>();
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
-builder.Services.AddScoped<IWorksService, WorksService>();
+builder.Services.AddScoped<IUploadService, UploadService>();
+builder.Services.AddScoped<IWorkService, WorkService>();
 builder.Services.AddScoped<IWorkMediaService, WorkMediaService>();
 
 builder.Services
     .AddFluentValidationAutoValidation()
     .AddFluentValidationClientsideAdapters();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterRequestValidator>();
-builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IUserService, UserService>();
 var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
 
 builder.Services

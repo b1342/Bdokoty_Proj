@@ -1,5 +1,5 @@
 using FluentValidation;
-using WorkshowcaseApi.Features.Users.DTOs;
+using WorkshowcaseApi.Features.Users.DTOs.Requests;
 
 namespace WorkshowcaseApi.Features.Users.Validators;
 
