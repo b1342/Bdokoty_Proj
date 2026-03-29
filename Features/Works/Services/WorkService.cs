@@ -9,6 +9,7 @@ using WorkshowcaseApi.Domain.Categories;
 using WorkshowcaseApi.Domain.Users;
 using WorkshowcaseApi.Domain.Works;
 using WorkshowcaseApi.Features.Categories.Repositories;
+using WorkshowcaseApi.Features.Tags;
 using WorkshowcaseApi.Features.Users.Repositories;
 using WorkshowcaseApi.Features.Works.DTOs.Requests;
 using WorkshowcaseApi.Features.Works.DTOs.Responses;
@@ -22,15 +23,18 @@ public sealed class WorkService : IWorkService
     private readonly IWorkRepository _workRepository;
     private readonly IUserRepository _userRepository;
     private readonly ICategoryRepository _categoryRepository;
+    private readonly ITagRepository _tagRepository;
 
     public WorkService(
         IWorkRepository workRepository,
         IUserRepository userRepository,
-        ICategoryRepository categoryRepository)
+        ICategoryRepository categoryRepository,
+        ITagRepository tagRepository)
     {
         _workRepository = workRepository ?? throw new ArgumentNullException(nameof(workRepository));
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _categoryRepository = categoryRepository ?? throw new ArgumentNullException(nameof(categoryRepository));
+        _tagRepository = tagRepository ?? throw new ArgumentNullException(nameof(tagRepository));
     }
 
     public async Task<WorkDetailsResponse> CreateAsync(Guid callerId, CreateWorkRequest request)
@@ -65,6 +69,20 @@ public sealed class WorkService : IWorkService
 
         await ValidateWorkProfessionalItemsAsync(request.Professionals);
         AddWorkProfessionalsFromRequest(work, request.Professionals, now);
+        if (request.TagIds is { Count: > 0 })
+        {
+            var uniqueTagIds = request.TagIds.Distinct().ToList();
+            var tags = await _tagRepository.GetByIdsAsync(uniqueTagIds);
+            if (tags.Count != uniqueTagIds.Count)
+            {
+                throw new ValidationException("One or more TagIds are invalid.");
+            }
+
+            foreach (var tag in tags)
+            {
+                work.WorkTags.Add(new WorkTag { WorkId = work.Id, TagId = tag.Id, Tag = tag });
+            }
+        }
 
         await _workRepository.AddAsync(work);
         await _workRepository.SaveChangesAsync();
@@ -168,7 +186,7 @@ public sealed class WorkService : IWorkService
             work.Description = NormalizeNullable(request.Description);
         }
 
-        if (request.PrimaryCategoryId.HasValue)
+        if (request.PrimaryCategoryId.HasValue && request.PrimaryCategoryId.Value != work.PrimaryCategoryId)
         {
             var category = await GetActiveCategoryOrThrowAsync(request.PrimaryCategoryId.Value);
             work.PrimaryCategoryId = category.Id;
@@ -216,6 +234,29 @@ public sealed class WorkService : IWorkService
             await ValidateWorkProfessionalItemsAsync(request.Professionals);
             work.Professionals.Clear();
             AddWorkProfessionalsFromRequest(work, request.Professionals, now);
+        }
+        if (request.TagIds is not null)
+        {
+            var uniqueTagIds = request.TagIds.Distinct().ToList();
+
+            if (uniqueTagIds.Count > 0)
+            {
+                var tags = await _tagRepository.GetByIdsAsync(uniqueTagIds);
+                if (tags.Count != uniqueTagIds.Count)
+                {
+                    throw new ValidationException("One or more TagIds are invalid.");
+                }
+
+                work.WorkTags.Clear();
+                foreach (var tag in tags)
+                {
+                    work.WorkTags.Add(new WorkTag { WorkId = work.Id, TagId = tag.Id, Tag = tag });
+                }
+            }
+            else
+            {
+                work.WorkTags.Clear();
+            }
         }
 
         await _workRepository.SaveChangesAsync();

@@ -22,4 +22,5 @@ public sealed class UpdateWorkRequest
     public string? Status { get; set; }
 
     public List<WorkProfessionalItemRequest>? Professionals { get; set; }
+    public List<Guid>? TagIds { get; set; }
 }

@@ -22,4 +22,5 @@ public sealed class CreateWorkRequest
     public string Status { get; set; } = string.Empty;
 
     public List<WorkProfessionalItemRequest> Professionals { get; set; } = new();
+    public List<Guid>? TagIds { get; set; }
 }
