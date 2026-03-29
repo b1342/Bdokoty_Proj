@@ -26,6 +26,11 @@ public static class WorkDtoMapper
                 .ThenBy(x => x.Id)
                 .Select(ToWorkMediaResponse)
                 .ToList(),
+            Professionals = work.Professionals
+                .OrderBy(x => x.SortOrder)
+                .ThenBy(x => x.Id)
+                .Select(ToWorkProfessionalResponse)
+                .ToList(),
             Tags = work.WorkTags
                 .OrderBy(wt => wt.Tag.Name)
                 .Select(wt => new TagResponse { Id = wt.Tag.Id, Name = wt.Tag.Name })
@@ -67,6 +72,25 @@ public static class WorkDtoMapper
             Caption = media.Caption,
             IsCover = media.IsCover,
             CreatedAt = media.CreatedAt
+        };
+    }
+
+    public static WorkProfessionalResponse ToWorkProfessionalResponse(WorkProfessional professional)
+    {
+        var displayName = professional.ProfessionalUser is not null
+            ? professional.ProfessionalUser.FullName
+            : professional.ExternalName;
+
+        return new WorkProfessionalResponse
+        {
+            ProfessionalUserId = professional.ProfessionalUserId,
+            DisplayName = displayName,
+            ProfessionCategory = professional.ProfessionCategory,
+            Phone = professional.Phone,
+            Email = professional.Email,
+            Whatsapp = professional.Whatsapp,
+            IsPrimary = professional.IsPrimary,
+            SortOrder = professional.SortOrder
         };
     }
 }

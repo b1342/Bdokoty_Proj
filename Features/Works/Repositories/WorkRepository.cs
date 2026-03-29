@@ -23,7 +23,10 @@ public sealed class WorkRepository : IWorkRepository
         return await _dbContext.Works
             .Include(x => x.PrimaryCategory)
             .Include(x => x.Media)
-            .Include(x => x.WorkTags).ThenInclude(wt => wt.Tag)
+            .Include(x => x.Professionals)
+                .ThenInclude(p => p.ProfessionalUser)
+            .Include(x => x.WorkTags)
+                .ThenInclude(wt => wt.Tag)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
     }
@@ -33,7 +36,10 @@ public sealed class WorkRepository : IWorkRepository
         return await _dbContext.Works
             .Include(x => x.PrimaryCategory)
             .Include(x => x.Media)
-            .Include(x => x.WorkTags).ThenInclude(wt => wt.Tag)
+            .Include(x => x.Professionals)
+                .ThenInclude(p => p.ProfessionalUser)
+            .Include(x => x.WorkTags)
+                .ThenInclude(wt => wt.Tag)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 

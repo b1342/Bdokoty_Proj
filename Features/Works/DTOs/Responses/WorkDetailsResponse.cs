@@ -29,6 +29,7 @@ public sealed class WorkDetailsResponse
 
     public List<WorkMediaResponse> Media { get; set; } = new();
 
+    public List<WorkProfessionalResponse> Professionals { get; set; } = new();
     public List<TagResponse> Tags { get; set; } = new();
 
     public string Status { get; set; } = string.Empty;
