@@ -18,6 +18,7 @@ public sealed class AppDbContext : DbContext
     public DbSet<ProfessionalProfile> ProfessionalProfiles => Set<ProfessionalProfile>();
     public DbSet<Work> Works => Set<Work>();
     public DbSet<WorkMedia> WorkMedia => Set<WorkMedia>();
+    public DbSet<WorkProfessional> WorkProfessionals => Set<WorkProfessional>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -270,5 +271,55 @@ public sealed class AppDbContext : DbContext
 
     entity.HasIndex(x => new { x.WorkId, x.SortOrder });
 });
+
+        modelBuilder.Entity<WorkProfessional>(entity =>
+        {
+            entity.ToTable("work_professionals");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.WorkId)
+                .IsRequired();
+
+            entity.Property(x => x.ProfessionalUserId);
+
+            entity.Property(x => x.ExternalName)
+                .HasMaxLength(200);
+
+            entity.Property(x => x.ProfessionCategory)
+                .HasMaxLength(100);
+
+            entity.Property(x => x.Phone)
+                .HasMaxLength(30);
+
+            entity.Property(x => x.Email)
+                .HasMaxLength(256);
+
+            entity.Property(x => x.Whatsapp)
+                .HasMaxLength(30);
+
+            entity.Property(x => x.IsPrimary)
+                .IsRequired();
+
+            entity.Property(x => x.SortOrder)
+                .IsRequired();
+
+            entity.Property(x => x.CreatedAt)
+                .IsRequired();
+
+            entity.HasOne(x => x.Work)
+                .WithMany(x => x.Professionals)
+                .HasForeignKey(x => x.WorkId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.ProfessionalUser)
+                .WithMany()
+                .HasForeignKey(x => x.ProfessionalUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(x => x.WorkId);
+
+            entity.HasIndex(x => new { x.WorkId, x.SortOrder });
+        });
     }
 }

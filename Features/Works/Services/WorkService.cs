@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WorkshowcaseApi.Common.Enums;
@@ -62,11 +63,15 @@ public sealed class WorkService : IWorkService
             PublishedAt = status == WorkStatus.Published ? now : null
         };
 
+        await ValidateWorkProfessionalItemsAsync(request.Professionals);
+        AddWorkProfessionalsFromRequest(work, request.Professionals, now);
+
         await _workRepository.AddAsync(work);
         await _workRepository.SaveChangesAsync();
 
-        work.PrimaryCategory = category;
-        return WorkDtoMapper.ToWorkDetailsResponse(work);
+        var created = await _workRepository.GetByIdAsync(work.Id)
+            ?? throw new InvalidOperationException("Work was not found after create.");
+        return WorkDtoMapper.ToWorkDetailsResponse(created);
     }
 
     public async Task<WorkDetailsResponse> GetByIdAsync(Guid callerId, Guid workId)
@@ -203,11 +208,21 @@ public sealed class WorkService : IWorkService
             work.Status = newStatus;
         }
 
-        work.UpdatedAt = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
+        work.UpdatedAt = now;
+
+        if (request.Professionals is not null)
+        {
+            await ValidateWorkProfessionalItemsAsync(request.Professionals);
+            work.Professionals.Clear();
+            AddWorkProfessionalsFromRequest(work, request.Professionals, now);
+        }
 
         await _workRepository.SaveChangesAsync();
 
-        return WorkDtoMapper.ToWorkDetailsResponse(work);
+        var updated = await _workRepository.GetByIdAsync(workId)
+            ?? throw new InvalidOperationException("Work was not found after update.");
+        return WorkDtoMapper.ToWorkDetailsResponse(updated);
     }
 
     private async Task<User> GetActiveCallerOrThrowAsync(Guid callerId)
@@ -313,5 +328,76 @@ public sealed class WorkService : IWorkService
 
         var trimmed = value.Trim();
         return trimmed.Length == 0 ? null : trimmed;
+    }
+
+    private async Task ValidateWorkProfessionalItemsAsync(IReadOnlyList<WorkProfessionalItemRequest> items)
+    {
+        var linkedIds = items
+            .Where(x => x.ProfessionalUserId.HasValue)
+            .Select(x => x.ProfessionalUserId!.Value)
+            .ToList();
+        if (linkedIds.Count != linkedIds.Distinct().Count())
+        {
+            throw new ValidationException("Each professional user may only appear once in the list.");
+        }
+
+        foreach (var item in items)
+        {
+            var externalName = NormalizeNullable(item.ExternalName);
+
+            if (item.ProfessionalUserId.HasValue)
+            {
+                if (!string.IsNullOrEmpty(externalName))
+                {
+                    throw new ValidationException(
+                        "ExternalName must not be provided when ProfessionalUserId is set.");
+                }
+
+                var user = await _userRepository.GetByIdAsync(item.ProfessionalUserId.Value);
+                if (user is null)
+                {
+                    throw new ValidationException("Professional user was not found.");
+                }
+
+                if (user.UserType != UserType.Professional)
+                {
+                    throw new ValidationException("Linked user must be a professional account.");
+                }
+
+                if (user.Status != UserStatus.Active)
+                {
+                    throw new ValidationException("Linked professional user must be active.");
+                }
+            }
+            else if (string.IsNullOrEmpty(externalName))
+            {
+                throw new ValidationException(
+                    "ExternalName is required when ProfessionalUserId is not provided.");
+            }
+        }
+    }
+
+    private static void AddWorkProfessionalsFromRequest(
+        Work work,
+        IReadOnlyList<WorkProfessionalItemRequest> items,
+        DateTime createdAt)
+    {
+        foreach (var item in items.OrderBy(x => x.SortOrder))
+        {
+            work.Professionals.Add(new WorkProfessional
+            {
+                Id = Guid.NewGuid(),
+                WorkId = work.Id,
+                ProfessionalUserId = item.ProfessionalUserId,
+                ExternalName = NormalizeNullable(item.ExternalName),
+                ProfessionCategory = NormalizeNullable(item.ProfessionCategory),
+                Phone = NormalizeNullable(item.Phone),
+                Email = NormalizeNullable(item.Email),
+                Whatsapp = NormalizeNullable(item.Whatsapp),
+                IsPrimary = item.IsPrimary,
+                SortOrder = item.SortOrder,
+                CreatedAt = createdAt
+            });
+        }
     }
 }

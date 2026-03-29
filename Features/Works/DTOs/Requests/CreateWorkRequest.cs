@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace WorkshowcaseApi.Features.Works.DTOs.Requests;
 
@@ -19,4 +20,6 @@ public sealed class CreateWorkRequest
     public bool IsAnonymous { get; set; }
 
     public string Status { get; set; } = string.Empty;
+
+    public List<WorkProfessionalItemRequest> Professionals { get; set; } = new();
 }

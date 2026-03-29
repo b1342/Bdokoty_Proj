@@ -23,6 +23,8 @@ public sealed class WorkRepository : IWorkRepository
         return await _dbContext.Works
             .Include(x => x.PrimaryCategory)
             .Include(x => x.Media)
+            .Include(x => x.Professionals)
+                .ThenInclude(p => p.ProfessionalUser)
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id);
     }
@@ -32,6 +34,8 @@ public sealed class WorkRepository : IWorkRepository
         return await _dbContext.Works
             .Include(x => x.PrimaryCategory)
             .Include(x => x.Media)
+            .Include(x => x.Professionals)
+                .ThenInclude(p => p.ProfessionalUser)
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
