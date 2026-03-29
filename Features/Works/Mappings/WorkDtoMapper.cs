@@ -26,6 +26,10 @@ public static class WorkDtoMapper
                 .ThenBy(x => x.Id)
                 .Select(ToWorkMediaResponse)
                 .ToList(),
+            Tags = work.WorkTags
+                .OrderBy(wt => wt.Tag.Name)
+                .Select(wt => new TagResponse { Id = wt.Tag.Id, Name = wt.Tag.Name })
+                .ToList(),
             Status = work.Status.ToString(),
             CreatedAt = work.CreatedAt,
             UpdatedAt = work.UpdatedAt,

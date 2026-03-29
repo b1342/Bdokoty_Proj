@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "DJCxSD08br2WsSNyRKcahyVPAekVDtxFLkLroKexL4U=",
+  "Hash": "F50SmPXD2WQfahTnF/gRBm/csmO5QOsrno8zukZZcz4=",
   "Source": "WorkshowcaseApi",
   "BasePath": "_content/WorkshowcaseApi",
   "Mode": "Default",
@@ -10,17 +10,17 @@
     {
       "Name": "WorkshowcaseApi\\wwwroot",
       "Source": "WorkshowcaseApi",
-      "ContentRoot": "C:\\Users\\1\\Desktop\\project_new\\WorkshowcaseApi\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\ShiraMerzel\\Desktop\\DAAATA פרוייקטים\\בודקותי\\WorkshowcaseApi\\wwwroot\\",
       "BasePath": "_content/WorkshowcaseApi",
       "Pattern": "**"
     }
   ],
   "Assets": [
     {
-      "Identity": "C:\\Users\\1\\Desktop\\project_new\\WorkshowcaseApi\\wwwroot\\uploads\\work-media\\2ded6f2816684f9bb40142d33fc034c4.jpg",
+      "Identity": "C:\\Users\\ShiraMerzel\\Desktop\\DAAATA פרוייקטים\\בודקותי\\WorkshowcaseApi\\wwwroot\\uploads\\work-media\\2ded6f2816684f9bb40142d33fc034c4.jpg",
       "SourceId": "WorkshowcaseApi",
       "SourceType": "Discovered",
-      "ContentRoot": "C:\\Users\\1\\Desktop\\project_new\\WorkshowcaseApi\\wwwroot\\",
+      "ContentRoot": "C:\\Users\\ShiraMerzel\\Desktop\\DAAATA פרוייקטים\\בודקותי\\WorkshowcaseApi\\wwwroot\\",
       "BasePath": "_content/WorkshowcaseApi",
       "RelativePath": "uploads/work-media/2ded6f2816684f9bb40142d33fc034c4.jpg",
       "AssetKind": "All",

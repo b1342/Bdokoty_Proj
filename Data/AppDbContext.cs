@@ -18,6 +18,8 @@ public sealed class AppDbContext : DbContext
     public DbSet<ProfessionalProfile> ProfessionalProfiles => Set<ProfessionalProfile>();
     public DbSet<Work> Works => Set<Work>();
     public DbSet<WorkMedia> WorkMedia => Set<WorkMedia>();
+    public DbSet<Tag> Tags => Set<Tag>();
+    public DbSet<WorkTag> WorkTags => Set<WorkTag>();
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -229,6 +231,44 @@ public sealed class AppDbContext : DbContext
                 .HasForeignKey(x => x.PrimaryCategoryId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+        modelBuilder.Entity<Tag>(entity =>
+        {
+            entity.ToTable("tags");
+
+            entity.HasKey(x => x.Id);
+
+            entity.Property(x => x.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(x => x.NormalizedName)
+                .IsRequired()
+                .HasMaxLength(100);
+
+            entity.Property(x => x.CreatedAt)
+                .IsRequired();
+
+            entity.HasIndex(x => x.NormalizedName)
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<WorkTag>(entity =>
+        {
+            entity.ToTable("work_tags");
+
+            entity.HasKey(x => new { x.WorkId, x.TagId });
+
+            entity.HasOne(x => x.Work)
+                .WithMany(x => x.WorkTags)
+                .HasForeignKey(x => x.WorkId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.Tag)
+                .WithMany()
+                .HasForeignKey(x => x.TagId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
         modelBuilder.Entity<WorkMedia>(entity =>
 {
     entity.ToTable("work_media");

@@ -29,6 +29,8 @@ public sealed class WorkDetailsResponse
 
     public List<WorkMediaResponse> Media { get; set; } = new();
 
+    public List<TagResponse> Tags { get; set; } = new();
+
     public string Status { get; set; } = string.Empty;
 
     public DateTime CreatedAt { get; set; }

@@ -36,6 +36,8 @@ public sealed class Work
 
     public ICollection<WorkMedia> Media { get; set; } = new List<WorkMedia>();
 
+    public ICollection<WorkTag> WorkTags { get; set; } = new List<WorkTag>();
+
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
