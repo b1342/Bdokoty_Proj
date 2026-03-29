@@ -64,14 +64,43 @@ desktop.ini
 .env.*
 !.env.example
 
-# ASP.NET local configuration overrides (often contain secrets)
+# ASP.NET local configuration overrides (may contain secrets)
 appsettings.Development.json
 appsettings.Local.json
 appsettings.*.local.json
 **/Properties/launchSettings.json
 secrets.json
 
+# ------------------------------
 # Certificates / keys
+# ------------------------------
 *.pfx
 *.pem
 *.key
+
+# ------------------------------
+# Uploads / media (VERY IMPORTANT)
+# ------------------------------
+wwwroot/uploads/
+wwwroot/uploads/**
+
+# ------------------------------
+# Database / local files
+# ------------------------------
+*.db
+*.sqlite
+*.sqlite3
+
+# ------------------------------
+# Coverage / test artifacts
+# ------------------------------
+coverage/
+coverage.*
+*.coverage
+*.coveragexml
+
+# ------------------------------
+# Misc
+# ------------------------------
+*.bak
+*.swp
