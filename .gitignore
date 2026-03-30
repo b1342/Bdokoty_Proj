@@ -2,8 +2,8 @@
 # ==================================================
 # BUILD / PUBLISH OUTPUTS
 # ==================================================
-bin/
-obj/
+**/bin/
+**/obj/
 out/
 publish/
 TestResults/
@@ -43,7 +43,8 @@ _ReSharper*/
 # ==================================================
 # NODE / FRONTEND
 # ==================================================
-node_modules/
+**/node_modules/
+**/.angular/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -70,9 +71,9 @@ desktop.ini
 !.env.example
 
 # ASP.NET LOCAL CONFIG (CONTAINS SECRETS)
-appsettings.Development.json
-appsettings.Local.json
-appsettings.*.local.json
+**/appsettings.Development.json
+**/appsettings.Local.json
+**/appsettings.*.local.json
 **/Properties/launchSettings.json
 secrets.json
 
@@ -86,8 +87,8 @@ secrets.json
 # ==================================================
 # UPLOADS / MEDIA (CRITICAL)
 # ==================================================
-wwwroot/uploads/
-wwwroot/uploads/**
+**/wwwroot/uploads/
+**/wwwroot/uploads/**
 
 # ==================================================
 # DATABASE FILES (LOCAL DEV)

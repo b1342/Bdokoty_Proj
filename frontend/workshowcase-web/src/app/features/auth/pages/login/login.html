@@ -1,0 +1,178 @@
+<div class="min-h-screen bg-stone-100 flex flex-col items-center justify-center p-4">
+  <div class="w-full max-w-[420px] bg-white rounded-3xl shadow-sm px-8 py-10">
+
+    <!-- Logo -->
+    <div class="flex justify-center mb-6">
+      <div class="w-14 h-14 bg-teal-600 rounded-2xl flex items-center justify-center shadow-sm">
+        <span class="text-white text-2xl font-bold tracking-tight">W</span>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <div class="text-center mb-8">
+      <h1 class="text-2xl font-bold text-neutral-900 mb-1.5">ברוכים השבים</h1>
+      <p class="text-neutral-500 text-sm">התחברו לחשבון Workvue שלכם</p>
+    </div>
+
+    <!-- Server error banner -->
+    @if (serverError()) {
+      <div
+        role="alert"
+        class="mb-5 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 text-right"
+      >
+        {{ serverError() }}
+      </div>
+    }
+
+    <!-- Login form -->
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+
+      <!-- Email field -->
+      <div class="mb-4">
+        <label for="email" class="block text-sm font-medium text-neutral-700 mb-1.5">
+          אימייל
+        </label>
+        <div class="relative">
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            class="w-full rounded-xl py-3 ps-11 pe-4 text-sm bg-stone-50 border
+                   placeholder:text-neutral-400 text-neutral-900
+                   transition-colors duration-150
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white"
+            [class.border-neutral-200]="!isFieldInvalid('email')"
+            [class.border-red-400]="isFieldInvalid('email')"
+          />
+          <!-- Mail icon — end side (left in RTL = end) but design shows it on right = start -->
+          <span class="absolute inset-y-0 start-3 flex items-center pointer-events-none text-neutral-400">
+            <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+          </span>
+        </div>
+        @if (fieldError('email'); as err) {
+          <p class="mt-1.5 text-xs text-red-500">{{ err }}</p>
+        }
+      </div>
+
+      <!-- Password field -->
+      <div class="mb-5">
+        <label for="password" class="block text-sm font-medium text-neutral-700 mb-1.5">
+          סיסמה
+        </label>
+        <div class="relative">
+          <input
+            id="password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            class="w-full rounded-xl py-3 ps-11 pe-11 text-sm bg-stone-50 border
+                   placeholder:text-neutral-400 text-neutral-900
+                   transition-colors duration-150
+                   focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 focus:bg-white"
+            [class.border-neutral-200]="!isFieldInvalid('password')"
+            [class.border-red-400]="isFieldInvalid('password')"
+          />
+          <!-- Lock icon — start side (right in RTL) -->
+          <span class="absolute inset-y-0 start-3 flex items-center pointer-events-none text-neutral-400">
+            <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </span>
+          <!-- Eye toggle — end side (left in RTL) -->
+          <button
+            type="button"
+            (click)="togglePassword()"
+            [attr.aria-label]="showPassword() ? 'הסתר סיסמה' : 'הצג סיסמה'"
+            class="absolute inset-y-0 end-3 flex items-center text-neutral-400
+                   hover:text-neutral-600 transition-colors duration-150"
+          >
+            @if (showPassword()) {
+              <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                <line x1="2" x2="22" y1="2" y2="22" />
+              </svg>
+            } @else {
+              <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            }
+          </button>
+        </div>
+        @if (fieldError('password'); as err) {
+          <p class="mt-1.5 text-xs text-red-500">{{ err }}</p>
+        }
+      </div>
+
+      <!-- Remember me + Forgot password row -->
+      <div class="flex items-center justify-between mb-6">
+        <!-- Forgot password — end side (left in RTL) -->
+        <a
+          routerLink="/auth/forgot-password"
+          class="text-sm text-teal-600 hover:text-teal-700 transition-colors duration-150"
+        >
+          שכחתם סיסמה?
+        </a>
+        <!-- Remember me — start side (right in RTL) -->
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <span class="text-sm text-neutral-600">זכור אותי</span>
+          <input
+            type="checkbox"
+            formControlName="rememberMe"
+            class="w-4 h-4 rounded accent-teal-600 cursor-pointer"
+          />
+        </label>
+      </div>
+
+      <!-- Submit button -->
+      <button
+        type="submit"
+        [disabled]="isLoading()"
+        class="w-full bg-teal-600 hover:bg-teal-700 active:bg-teal-800
+               disabled:opacity-60 disabled:cursor-not-allowed
+               text-white font-semibold py-3.5 rounded-xl
+               transition-colors duration-150 text-sm"
+      >
+        @if (isLoading()) {
+          <span class="flex items-center justify-center gap-2">
+            <svg class="animate-spin w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10"
+                      stroke="currentColor" stroke-width="4" />
+              <path class="opacity-75" fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+            מתחבר...
+          </span>
+        } @else {
+          התחברות
+        }
+      </button>
+
+    </form>
+
+    <!-- Register link -->
+    <p class="text-center text-sm text-neutral-500 mt-6">
+      אין לכם חשבון?
+      <a
+        routerLink="/auth/register"
+        class="text-teal-600 hover:text-teal-700 font-medium transition-colors duration-150 me-1"
+      >
+        צרו חשבון
+      </a>
+    </p>
+
+  </div>
+</div>
